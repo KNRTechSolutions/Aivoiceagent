@@ -20,8 +20,32 @@
 </script>
 <style>
   html{scroll-behavior:smooth;}
+  html,body{max-width:100%;overflow-x:hidden;}
   body{background:#fff;}
   ::selection{background:#6d28d9;color:#fff;}
+
+  /* Prevent grid/flex children from overflowing their track when they contain
+     long headings or text — the root cause of text getting cut off / horizontal
+     scroll on some screen sizes. Safe: explicit width/flex-basis utilities
+     elsewhere are unaffected by min-width:0. */
+  .grid > *{min-width:0;}
+  h1,h2,h3,h4{overflow-wrap:break-word;word-break:break-word;}
+
+  /* ---- Responsive safety net (all devices) ---- */
+  img,svg,video,canvas{max-width:100%;height:auto;}
+  table{max-width:100%;}
+  * { -webkit-tap-highlight-color: transparent; }
+  button, a, input, textarea, select { touch-action: manipulation; }
+
+  /* Comfortable min tap-target height on touch devices */
+  @media (max-width:1023px){
+    button{min-height:40px;}
+  }
+
+  /* Very small phones (<=360px): tighten hero type scale a touch further */
+  @media (max-width:360px){
+    h1{word-break:break-word;}
+  }
   ::-webkit-scrollbar{width:9px;} ::-webkit-scrollbar-track{background:#f6f5fb;}
   ::-webkit-scrollbar-thumb{background:#d9d3ee;border-radius:99px;}
 
@@ -69,13 +93,13 @@
       <button id="mobBtn" class="lg:hidden"><svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     </div>
   </div>
-  <div id="mobMenu" class="hidden lg:hidden bg-white border-t border-border px-6 py-4 space-y-3" ></div>
+  <div id="mobMenu" class="hidden lg:hidden bg-white border-t border-border px-6 py-4 space-y-3 max-h-[calc(100vh-73px)] overflow-y-auto" ></div>
 </header>
 
 <main id="app" class="pt-[73px]"></main>
 
 <footer class="bg-ink text-slate-400 mt-4">
-  <div class="max-w-7xl mx-auto px-6 py-14 grid sm:grid-cols-2 md:grid-cols-5 gap-10 text-sm">
+  <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-10 text-sm">
     <div class="md:col-span-2">
       <div class="flex items-center gap-2 font-heading font-extrabold text-lg text-white mb-3">
         <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-brand2 flex items-center justify-center text-sm">G</span>Glowminds AI
@@ -107,7 +131,7 @@
 </footer>
 
 <div id="modalBg" class="fixed inset-0 z-[80] hidden items-center justify-center modal-bg px-4 py-8 overflow-y-auto">
-  <div id="modalInner" class="bg-white rounded-2xl max-w-lg w-full my-auto"></div>
+  <div id="modalInner" class="bg-white rounded-2xl max-w-lg w-full my-auto max-h-[85vh] overflow-y-auto"></div>
 </div>
 <div id="toast" class="fixed bottom-6 right-6 z-[90] bg-ink text-white px-5 py-3 rounded-xl text-sm font-semibold shadow-xl opacity-0 pointer-events-none translate-y-3 transition-all duration-300"></div>
 
@@ -200,7 +224,7 @@ const ICONS = {
   utensils:'M8.25 3v6.75m0 0a2.25 2.25 0 002.25 2.25v9m-2.25-11.25a2.25 2.25 0 01-2.25 2.25v9m4.5-13.5V3m6 3v14.25m0-14.25a2.25 2.25 0 012.25 2.25v3a2.25 2.25 0 01-2.25 2.25m0-7.5a2.25 2.25 0 00-2.25 2.25v3a2.25 2.25 0 002.25 2.25',
   chip:'M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3M7 7h10v10H7z',
   briefcase:'M20.25 14.15v4.25a2 2 0 01-2 2H5.75a2 2 0 01-2-2v-4.25m16.5 0a2 2 0 00-1-1.73l-7-4.04a2 2 0 00-2 0l-7 4.04a2 2 0 00-1 1.73m16.5 0v.2a2 2 0 01-1 1.73l-7 4.04a2 2 0 01-2 0l-7-4.04a2 2 0 01-1-1.73v-.2M9 6.75V5.5A2.25 2.25 0 0111.25 3.25h1.5A2.25 2.25 0 0115 5.5v1.25',
-  building:'M3 21h18M5 21V7l7-4 7 4v14M9 9h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15',
+  building:'M3 21h18M5 21V7l7-4 7 4v14M9 9h1.5m-1.5 3h1.5m-1.5 3h1.5M13.5 6.75h.75m-.75 3h.75m-.75 3h.75',
   check:'M4.5 12.75l6 6 9-13.5',
 };
 function svgIcon(name, cls){ return `<svg class="${cls||'w-6 h-6'}" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="${ICONS[name]||ICONS.chip}"/></svg>`; }
@@ -284,7 +308,7 @@ function pageHeader(eyebrow, title, sub){
     <div class="glow w-72 h-72 bg-brand2 top-10 right-0" style="animation-delay:2s;"></div>
     <div class="max-w-4xl mx-auto text-center relative z-10">
       <p class="text-brand2 font-bold tracking-widest text-xs uppercase mb-4">${eyebrow}</p>
-      <h1 class="font-heading text-3xl sm:text-5xl font-extrabold text-white leading-tight mb-4">${title}</h1>
+      <h1 class="font-heading text-2xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight mb-4 break-words">${title}</h1>
       <p class="text-slate-400 max-w-xl mx-auto">${sub}</p>
     </div>
   </section>`;
@@ -300,12 +324,12 @@ function pageHome(){
     <div class="glow w-96 h-96 bg-brand2 top-1/3 -right-32" style="animation-delay:2s;"></div>
     <div class="glow w-72 h-72 bg-brand bottom-0 left-1/3" style="animation-delay:4s;"></div>
 
-    <div class="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-5 gap-12 items-center">
-      <div class="lg:col-span-3 reveal in">
+    <div class="relative z-10 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-12 items-center">
+      <div class="min-w-0 lg:col-span-3 reveal in">
         <p class="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-brand2 border border-brand2/30 rounded-full px-4 py-1.5 mb-6">
           <span class="dial-dot"></span> AI Voice Agents for Call Centers
         </p>
-        <h1 class="font-heading text-4xl sm:text-6xl font-extrabold text-white leading-[1.05] mb-6">
+        <h1 class="font-heading text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-[1.1] sm:leading-[1.05] mb-6 max-w-full break-words">
           Every call answered. <span class="bg-gradient-to-r from-brand to-brand2 bg-clip-text text-transparent">Every lead followed up.</span>
         </h1>
         <p class="text-slate-400 text-lg max-w-lg mb-8 leading-relaxed">Glowminds AI runs your inbound, outbound and promotional calling - plus WhatsApp, CRM, onboarding and renewals - so no lead waits, and no customer is missed.</p>
@@ -315,15 +339,15 @@ function pageHome(){
         </div>
       </div>
 
-      <div class="lg:col-span-2 reveal reveal-delay-1 in">
+      <div class="min-w-0 lg:col-span-2 reveal reveal-delay-1 in">
         <div class="bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur">
           <div class="flex items-center justify-between mb-4">
             <p class="text-white font-heading font-bold text-sm">Live Calling Snapshot</p>
             <span class="text-[10px] font-bold text-brand2 uppercase tracking-widest flex items-center gap-1.5"><span class="dial-dot"></span>Demo data</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 mb-4">
-            <div class="bg-white/5 rounded-xl p-3"><p class="text-2xl font-heading font-extrabold text-white" id="statCalls">0</p><p class="text-[11px] text-slate-400">Calls placed today</p></div>
-            <div class="bg-white/5 rounded-xl p-3"><p class="text-2xl font-heading font-extrabold text-white" id="statBooked">0</p><p class="text-[11px] text-slate-400">Meetings booked</p></div>
+          <div class="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
+            <div class="bg-white/5 rounded-xl p-2.5 sm:p-3"><p class="text-xl sm:text-2xl font-heading font-extrabold text-white" id="statCalls">0</p><p class="text-[11px] text-slate-400">Calls placed today</p></div>
+            <div class="bg-white/5 rounded-xl p-2.5 sm:p-3"><p class="text-xl sm:text-2xl font-heading font-extrabold text-white" id="statBooked">0</p><p class="text-[11px] text-slate-400">Meetings booked</p></div>
           </div>
           <div class="space-y-2 text-xs" id="tickerFeed"></div>
         </div>
@@ -341,7 +365,7 @@ function pageHome(){
         ${sectionTag('The Problem')}
         <h2 class="font-heading text-3xl sm:text-4xl font-extrabold">You're doing the work. The phones just can't keep up.</h2>
       </div>
-      <div class="grid md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         ${[
           ['01','Leads Go Cold','Every minute a lead waits, your chance of converting them drops. A manual team just can\'t call back fast enough, every time.'],
           ['02','Manual Calling Doesn\'t Scale','Hiring, training and managing a bigger calling team is slow and expensive - and quality drops as the team grows.'],
@@ -363,7 +387,7 @@ function pageHome(){
         ${sectionTag('Our Core AI Calling Services')}
         <h2 class="font-heading text-3xl sm:text-4xl font-extrabold">Every kind of call, handled by AI agents.</h2>
       </div>
-      <div class="grid md:grid-cols-3 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         ${SERVICES.slice(0,3).map((s,i)=>`
           <div class="reveal reveal-delay-${i+1} card-lift bg-white border border-border rounded-2xl p-7">
             <div class="w-12 h-12 rounded-xl bg-brandSoft text-brand flex items-center justify-center mb-5">${svgIcon(s.icon)}</div>
@@ -388,7 +412,7 @@ function pageHome(){
         <h2 class="font-heading text-3xl sm:text-4xl font-extrabold text-white">The conversion gap is real.</h2>
         <p class="text-slate-400 mt-3">Illustrative comparison - actual results vary by industry, script and lead quality.</p>
       </div>
-      <div class="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
         ${['manual','ai'].map(type=>{
           const items = CONVERSION_DEMO.slice(0,3);
           return `<div class="reveal bg-white/5 border border-white/10 rounded-2xl p-6">
@@ -434,7 +458,7 @@ function pageHome(){
         ${sectionTag('Our Process')}
         <h2 class="font-heading text-3xl sm:text-4xl font-extrabold">From first call to live AI agent. Fast.</h2>
       </div>
-      <div class="grid md:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         ${[
           ['01','We Understand Your Calls','A short call to learn your scripts, call types and where you\'re losing conversions today.'],
           ['02','We Configure Your Agent','We build and train your AI voice agent on your scripts, tone, and integrations.'],
@@ -452,13 +476,13 @@ function pageHome(){
 
   <!-- why us -->
   <section class="py-24 px-6 bg-soft">
-    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
       <div class="reveal">
         ${sectionTag('Why Glowminds AI')}
         <h2 class="font-heading text-3xl sm:text-4xl font-extrabold mb-5">Built for outcomes, not demos.</h2>
         <p class="text-muted leading-relaxed">We measure success the way you do - calls answered, leads converted, and hours saved. Every AI agent we deploy is reviewed against your real conversion numbers, not a sales pitch.</p>
       </div>
-      <div class="grid sm:grid-cols-2 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
         ${[
           ['Outcome-First','If it won\'t lift conversion or save hours, we won\'t recommend it.'],
           ['Every Sector Covered','From clinics to enterprises - one platform, tuned per industry.'],
@@ -540,7 +564,7 @@ function faqSection(items){
 function pageServices(){
   return pageHeader('What We Do', 'AI agents for every kind of call.', 'Inbound, outbound, promotional and everything that connects to them - one platform, built around real conversion outcomes.') +
   `<section class="py-20 px-6">
-    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-6">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
       ${SERVICES.map((s,i)=>`
         <div class="reveal reveal-delay-${(i%3)+1} card-lift bg-white border border-border rounded-2xl p-7">
           <div class="flex items-start justify-between mb-4">
@@ -566,7 +590,7 @@ function pageServices(){
 function pageIndustries(){
   return pageHeader('Industries', 'One platform. Twenty-one industries.', 'Every sector has a different reason calls get missed. Tap an industry to see how Glowminds AI fits.') +
   `<section class="py-20 px-6">
-    <div class="max-w-6xl mx-auto grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="indGrid">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="indGrid">
       ${INDUSTRIES.map((ind,i)=>`
         <button onclick="openIndustry('${ind.id}')" class="reveal reveal-delay-${(i%3)+1} card-lift text-left bg-white border border-border rounded-2xl p-6">
           <div class="w-11 h-11 rounded-xl bg-brandSoft text-brand flex items-center justify-center mb-4">${svgIcon(ind.icon)}</div>
@@ -609,8 +633,25 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
 function pageCompare(){
   return pageHeader('Manual vs AI', 'Manual calling vs AI calling, side by side.', 'A plain look at where AI agents change the economics of calling - and where humans still matter.') +
   `<section class="py-16 px-6">
-    <div class="max-w-5xl mx-auto reveal bg-white border border-border rounded-2xl overflow-hidden mb-16">
-      <table class="w-full text-sm">
+    <!-- Mobile (<sm): stacked cards, one per row -->
+    <div class="sm:hidden reveal space-y-4 mb-16">
+      ${COMPARE_ROWS.map(r=>`
+        <div class="bg-white border border-border rounded-2xl p-5">
+          <p class="font-heading font-bold text-sm mb-3">${r.label}</p>
+          <div class="flex items-start gap-2 mb-2">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-bad bg-bad/10 rounded-full px-2 py-1 flex-shrink-0 mt-0.5">Manual</span>
+            <span class="text-sm text-muted">${r.manual}</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-[10px] font-bold uppercase tracking-widest text-brand bg-brandSoft rounded-full px-2 py-1 flex-shrink-0 mt-0.5">Glowminds AI</span>
+            <span class="text-sm text-ink font-medium">${r.ai}</span>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- sm and up: full comparison table, horizontally scrollable as a safety net -->
+    <div class="hidden sm:block max-w-5xl mx-auto reveal bg-white border border-border rounded-2xl overflow-x-auto mb-16">
+      <table class="w-full text-sm min-w-[560px]">
         <thead><tr class="bg-soft text-left">
           <th class="px-6 py-4 font-heading font-bold">What matters</th>
           <th class="px-6 py-4 font-heading font-bold text-bad">Manual Calling</th>
@@ -633,7 +674,7 @@ function pageCompare(){
         <h2 class="font-heading text-2xl sm:text-3xl font-extrabold">Conversion rate: manual vs AI, by industry</h2>
         <p class="text-muted text-sm mt-2 max-w-lg mx-auto">Demo figures for illustration only - your actual conversion lift depends on script quality, lead source and industry.</p>
       </div>
-      <div class="grid sm:grid-cols-2 gap-8 mt-10">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mt-10">
         ${CONVERSION_DEMO.map(row=>`
           <div class="reveal bg-white border border-border rounded-2xl p-6">
             <p class="font-heading font-bold mb-4">${row.label}</p>
@@ -671,7 +712,7 @@ const PLANS = [
 function pagePricing(){
   return pageHeader('Pricing', 'Simple pricing. Zero surprises.', 'Pay for call-minutes, not per seat. Every plan includes the full platform - calling, WhatsApp, CRM, and analytics.') +
   `<section class="py-16 px-6">
-    <div class="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       ${PLANS.map(p=>`
         <div class="reveal card-lift relative bg-white border ${p.best?'border-brand shadow-xl shadow-brand/10':'border-border'} rounded-2xl p-6 flex flex-col">
           ${p.best?'<span class="absolute -top-3 left-6 bg-brand text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Most Popular</span>':''}
@@ -688,7 +729,7 @@ function pagePricing(){
 
     <div class="max-w-4xl mx-auto mt-20 reveal">
       <h2 class="font-heading text-2xl font-extrabold text-center mb-8">How call-minutes work</h2>
-      <div class="grid sm:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
         ${[
           ['Uses Minutes','Inbound & outbound AI calls','Promotional campaign calls'],
           ['Always Included','CRM & contact management','WhatsApp automation','Dashboards & reporting'],
@@ -712,7 +753,7 @@ function pageAbout(){
     <div class="max-w-4xl mx-auto reveal mb-16">
       <p class="text-muted leading-relaxed text-lg">Glowminds AI Technologies Private Limited started with a simple observation: most businesses lose more revenue to slow follow-ups than to bad products. We build AI voice agents that pick up every call, qualify every lead, and follow up on every renewal - so your team can focus on the conversations that need a human.</p>
     </div>
-    <div class="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       ${[
         ['Outcome-First','We measure ourselves on conversion lift and hours saved - not on how impressive the demo looks.'],
         ['Built for Scale','From a single clinic to a multi-region enterprise call center, the same platform scales with you.'],
@@ -736,7 +777,7 @@ function pageAbout(){
 function pageContact(){
   return pageHeader('Contact', 'Let\'s find your revenue leak.', 'Book a free 30-minute call - we\'ll show you exactly where AI calling fits your business.') +
   `<section class="py-16 px-6">
-    <div class="max-w-5xl mx-auto grid md:grid-cols-5 gap-10">
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
       <div class="reveal md:col-span-2 space-y-4">
         <div class="bg-soft rounded-xl p-5"><p class="text-xs text-muted uppercase tracking-widest mb-1 font-bold">Email</p><p class="font-medium">sales@glowminds.in</p></div>
         <div class="bg-soft rounded-xl p-5"><p class="text-xs text-muted uppercase tracking-widest mb-1 font-bold">Phone</p><p class="font-medium">(+91) 9640080791</p></div>
@@ -744,11 +785,11 @@ function pageContact(){
       </div>
       <div class="reveal md:col-span-3">
         <form id="contactForm" class="space-y-4" novalidate>
-          <div class="grid sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><input id="cf-name" placeholder="Full name" class="w-full border border-border rounded-lg px-4 py-3 text-sm outline-none focus:border-brand"><p class="cf-err text-red-500 text-xs mt-1 hidden">Enter your name.</p></div>
             <div><input id="cf-company" placeholder="Company" class="w-full border border-border rounded-lg px-4 py-3 text-sm outline-none focus:border-brand"><p class="cf-err text-red-500 text-xs mt-1 hidden">Enter your company.</p></div>
           </div>
-          <div class="grid sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><input id="cf-email" type="email" placeholder="Work email" class="w-full border border-border rounded-lg px-4 py-3 text-sm outline-none focus:border-brand"><p class="cf-err text-red-500 text-xs mt-1 hidden">Enter a valid email.</p></div>
             <select id="cf-industry" class="w-full border border-border rounded-lg px-4 py-3 text-sm outline-none focus:border-brand">
               <option value="">Industry (optional)</option>
